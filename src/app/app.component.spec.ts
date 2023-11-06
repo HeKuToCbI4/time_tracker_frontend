@@ -15,13 +15,13 @@ describe('AppComponent', () => {
   it(`should have as title 'timetrackerbackendangular'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('timetrackerbackendangular');
+    expect(app.title).toEqual('timetrackerfrontendangular');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('timetrackerbackendangular app is running!');
+    expect(compiled.querySelector('.content span')?.textContent).toContain('timetrackerfrontendangular app is running!');
   });
 });
