@@ -1,0 +1,24 @@
+<div class="data-list">
+  <h2>Data</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>executable_name</th>
+      <th>duration</th>
+      <th>executable_path</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let process of per_process_utilization">
+      <td>{{ process.executable_name }}</td>
+      <td>{{ process.duration }}</td>
+      <td>{{ process.executable_path }}</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="divChart">
+  <canvas id="per-process-utilization-chart"></canvas>
+</div>
+
