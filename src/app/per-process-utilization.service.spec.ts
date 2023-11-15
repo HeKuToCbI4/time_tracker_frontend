@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { PerProcessUtilizationService } from './per-process-utilization.service';
+import {PerProcessUtilizationService} from './per-process-utilization.service';
 
 describe('PerProcessUtilizationService', () => {
   let service: PerProcessUtilizationService;

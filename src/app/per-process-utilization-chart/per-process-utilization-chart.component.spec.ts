@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { PerProcessUtilizationChartComponent } from './per-process-utilization-chart.component';
+import {PerProcessUtilizationChartComponent} from './per-process-utilization-chart.component';
 
 describe('PerProcessUtilizationChartComponent', () => {
   let component: PerProcessUtilizationChartComponent;

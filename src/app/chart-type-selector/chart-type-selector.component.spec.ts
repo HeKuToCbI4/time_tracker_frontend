@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ChartTypeSelectorComponent } from './chart-type-selector.component';
+import {ChartTypeSelectorComponent} from './chart-type-selector.component';
 
 describe('ChartTypeSelectorComponent', () => {
   let component: ChartTypeSelectorComponent;

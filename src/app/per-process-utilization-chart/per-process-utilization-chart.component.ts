@@ -1,9 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewChecked, Component, OnInit} from '@angular/core';
 import {PerProcessUtilizationService} from "../per-process-utilization.service";
 import {PerProcessUtilization} from "../per-process-utilization.interface";
 import {Chart, registerables} from 'chart.js';
-import {ChartTypeSelectorComponent} from '../chart-type-selector/chart-type-selector.component'
-import {MatTableModule} from '@angular/material/table';
+import {ChartTypeSelectorService} from "../chart-type-selector.service";
 
 Chart.register(...registerables);
 
@@ -12,10 +11,15 @@ Chart.register(...registerables);
   templateUrl: './per-process-utilization-chart.component.html',
   styleUrls: ['./per-process-utilization-chart.component.css'],
 })
-export class PerProcessUtilizationChartComponent implements OnInit {
+export class PerProcessUtilizationChartComponent implements OnInit, AfterViewChecked {
   per_process_utilization: PerProcessUtilization[] = [];
   displayedColumns: string[] = ['executable_name', 'duration', 'executable_path'];
   public loading: boolean = true;
+  public selectedChartType: string = 'bar';
+  myChart: Chart<'bar'> | Chart<'pie'> | undefined;
+
+  constructor(private perProcessUtilizationService: PerProcessUtilizationService, private chartTypeSelectorService: ChartTypeSelectorService) {
+  }
 
   createBarChart(labels: string[] = [], data: number[] = []): Chart<"bar"> {
     return new Chart("per-process-utilization-chart", {
@@ -95,21 +99,28 @@ export class PerProcessUtilizationChartComponent implements OnInit {
     });
   }
 
-  constructor(private perProcessUtilizationService: PerProcessUtilizationService) {
+  ngOnInit(): void {
+    this.createChart();
+    this.chartTypeSelectorService.selectedChartType.asObservable().subscribe((selectedChartType) => {
+      this.selectedChartType = selectedChartType;
+      this.createChart();
+    })
+  }
+
+  ngAfterViewChecked() {
+
   }
 
   protected createChart() {
-    var selected = new ChartTypeSelectorComponent().selected;
-    console.log(selected);
-    var myChart: Chart<'bar'> | Chart<'pie'>;
-    if (selected == 'bar')
-    {
-      myChart = this.createBarChart()
+    let canvas = document.getElementById('per-process-utilization-chart');
+    console.log(canvas);
+    this.myChart?.destroy();
+    if (this.selectedChartType == 'bar') {
+      this.myChart = this.createBarChart()
+    } else {
+      this.myChart = this.createPieChart();
     }
-    else {
-      myChart = this.createPieChart();
-    }
-    this.updateChartData(myChart);
+    this.updateChartData(this.myChart);
   }
 
   protected updateChartData(chart: Chart<"bar"> | Chart<"pie">): void {
@@ -128,9 +139,5 @@ export class PerProcessUtilizationChartComponent implements OnInit {
         })
       }
     });
-  }
-
-  ngOnInit(): void {
-    this.createChart();
   }
 }
