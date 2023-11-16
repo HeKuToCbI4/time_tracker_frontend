@@ -9,6 +9,10 @@ import {NgOptimizedImage} from "@angular/common";
 import {ChartTypeSelectorComponent} from './chart-type-selector/chart-type-selector.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatLegacyTableModule} from "@angular/material/legacy-table";
+import { HostSelectorComponent } from './host-selector/host-selector.component';
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {MatOptionModule} from "@angular/material/core";
+import {MatSelectModule} from "@angular/material/select";
 
 @NgModule({
   declarations: [
@@ -21,7 +25,11 @@ import {MatLegacyTableModule} from "@angular/material/legacy-table";
     NgOptimizedImage,
     ChartTypeSelectorComponent,
     BrowserAnimationsModule,
-    MatLegacyTableModule
+    MatLegacyTableModule,
+    MatFormFieldModule,
+    MatOptionModule,
+    MatSelectModule,
+    HostSelectorComponent,
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,9 +1,10 @@
-/*#divChart{*/
-/*  display: block;*/
-/*  width: 400px;*/
-/*  height: 400px;*/
-/*}*/
+#divChart{
+  display: block;
+  width: 750px;
+  height: 750px;
+}
 
 .utilization-table {
+  display: block;
   width: 100%;
 }

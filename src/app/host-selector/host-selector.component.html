@@ -1,0 +1,6 @@
+<mat-form-field>
+  <mat-label>Host</mat-label>
+  <mat-select (selectionChange)="onSelectedHostChanged($event)">
+    <mat-option *ngFor="let o of options" [value]="o.value">{{o.name}}</mat-option>
+  </mat-select>
+</mat-form-field>

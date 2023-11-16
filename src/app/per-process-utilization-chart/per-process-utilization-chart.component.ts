@@ -2,9 +2,25 @@ import {AfterViewChecked, Component, OnInit} from '@angular/core';
 import {PerProcessUtilizationService} from "../per-process-utilization.service";
 import {PerProcessUtilization} from "../per-process-utilization.interface";
 import {Chart, registerables} from 'chart.js';
-import {ChartTypeSelectorService} from "../chart-type-selector.service";
+import {ChartTypeSelectorService} from "../chart-type-selector/chart-type-selector.service";
+import {HostSelectorService} from "../host-selector/host-selector.service";
 
 Chart.register(...registerables);
+
+function getRandomColorHex() {
+  var hex = "0123456789ABCDEF",
+    color = "#";
+  for (var i = 1; i <= 6; i++) {
+    color += hex[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+let defaultColors: string[] = [];
+for (let i=0; i<50; i++)
+{
+  defaultColors.push(getRandomColorHex());
+}
 
 @Component({
   selector: 'app-per-process-utilization-chart',
@@ -13,12 +29,13 @@ Chart.register(...registerables);
 })
 export class PerProcessUtilizationChartComponent implements OnInit, AfterViewChecked {
   per_process_utilization: PerProcessUtilization[] = [];
-  displayedColumns: string[] = ['executable_name', 'duration', 'executable_path'];
-  public loading: boolean = true;
+  displayedColumns = ['executable_name', 'duration', 'executable_path', 'host'];
+  public loading = true;
   public selectedChartType: string = 'bar';
+  public selectedHost: string = 'all';
   myChart: Chart<'bar'> | Chart<'pie'> | undefined;
 
-  constructor(private perProcessUtilizationService: PerProcessUtilizationService, private chartTypeSelectorService: ChartTypeSelectorService) {
+  constructor(private perProcessUtilizationService: PerProcessUtilizationService, private chartTypeSelectorService: ChartTypeSelectorService, private hostSelector: HostSelectorService) {
   }
 
   createBarChart(labels: string[] = [], data: number[] = []): Chart<"bar"> {
@@ -31,22 +48,7 @@ export class PerProcessUtilizationChartComponent implements OnInit, AfterViewChe
           maxBarThickness: 50,
           label: 'Hours spend per process',
           data: data,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
+          backgroundColor: defaultColors,
           borderWidth: 3,
         }]
       },
@@ -69,22 +71,7 @@ export class PerProcessUtilizationChartComponent implements OnInit, AfterViewChe
         datasets: [{
           label: 'Hours spent per process',
           data: data,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
+          backgroundColor: defaultColors,
           borderWidth: 3,
         }]
       },
@@ -104,11 +91,14 @@ export class PerProcessUtilizationChartComponent implements OnInit, AfterViewChe
     this.chartTypeSelectorService.selectedChartType.asObservable().subscribe((selectedChartType) => {
       this.selectedChartType = selectedChartType;
       this.createChart();
+    });
+    this.hostSelector.selectedHost.asObservable().subscribe((selectedHost) => {
+      this.selectedHost = selectedHost;
+      this.createChart();
     })
   }
 
   ngAfterViewChecked() {
-
   }
 
   protected createChart() {
@@ -120,20 +110,37 @@ export class PerProcessUtilizationChartComponent implements OnInit, AfterViewChe
     } else {
       this.myChart = this.createPieChart();
     }
-    this.updateChartData(this.myChart);
+    this.updateChartData(this.myChart, this.selectedHost);
   }
 
-  protected updateChartData(chart: Chart<"bar"> | Chart<"pie">): void {
+  protected updateChartData(chart: Chart<"bar"> | Chart<"pie">, host: string): void {
     this.loading = true;
-    this.perProcessUtilizationService.GetUtilization().subscribe((utilization) => {
+    this.perProcessUtilizationService.GetUtilization(this.selectedHost).subscribe((utilization) => {
       if (utilization) {
         this.loading = false;
         this.per_process_utilization = utilization;
-        utilization.forEach((utilization) => {
+        var colors = [];
+        const valueSum = this.per_process_utilization.reduce((a, b) => a + b.duration, 0);
+        const thresholdPercent = 1;
+        const slices = this.per_process_utilization.map((v) => ({ label: v.executable_name, value: v.duration}))
+          .reduce((accumulator: {label: string, value: number}[], currObj) => {
+            const percent = 100 * currObj.value / valueSum;
+            if (percent < thresholdPercent) {
+              const others = accumulator.find(o => o.label == 'Others');
+              if (!others) {
+                return accumulator.concat({ label: 'Others', value: currObj.value });
+              }
+              others.value += currObj.value;
+            } else {
+              accumulator.push(currObj);
+            }
+            return accumulator;
+          }, []);
 
-          chart.data.datasets[0].data.push(utilization.duration / 1000000 / 60 / 60);
+        slices.forEach((utilization) => {
+          chart.data.datasets[0].data.push(utilization.value / 1000000 / 60 / 60);
           if (chart.data.labels) {
-            chart.data.labels.push(utilization.executable_name);
+            chart.data.labels.push(utilization.label);
           }
           chart.update();
         })

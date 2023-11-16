@@ -2,6 +2,7 @@
   <img ngSrc="assets/loading-cat.gif" height="280" width="498" alt="loading_cat" class="centrify">
 </div>
 <app-chart-type-selector/>
+<app-host-selector/>
 <div id="divChart">
   <div>{{selectedChartType}}</div>
   <canvas id="per-process-utilization-chart"></canvas>
@@ -31,6 +32,11 @@
     <ng-container matColumnDef="executable_path">
       <th mat-header-cell *matHeaderCellDef> Executable path</th>
       <td mat-cell *matCellDef="let element"> {{element.executable_path}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="host">
+      <th mat-header-cell *matHeaderCellDef> Host</th>
+      <td mat-cell *matCellDef="let element"> {{element.host}} </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
